@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var listautenti = require('./database.json')
 var jsonfile = require('jsonfile');
-
+var path=require('path');
 router.get('/', function(req, res) {
     res.status(200).json(listautenti);
 });
@@ -58,7 +58,46 @@ router.delete('/id/:id', function(req, res) {
     var utente = listautenti.find(function(el) {
         return el.id == id;
     })
-    res.status(200).json(utente);
-    res.send('cancello:' + utente);
+    var indice = listautenti.indexOf(utente);
+    listautenti.splice(indice, 1);
+    jsonfile.writeFile(path.join(__dirname, 'database.json'),listautenti,function(err){
+      console.log(err)
+    })
+    res.json(listautenti);
 })
+//aggiungere un nuovo utente
+router.post('/',function(req,res){
+  var nuovo=req.body;
+  //calcolo max id
+  var max= 0
+  for (let i=0; i<listautenti.length; i++){
+    if (listautenti[i].id>=max){
+      max=listautenti[i].id;
+        }
+        //assegno nuovo id
+        nuovo.id=max+1;
+        listautenti.push(nuovo);
+      //salvo su file
+      jsonfile.writeFile(path.join(__dirname,'database.json'),listautenti.function(err){
+        console.log(err);
+      })
+  //mando la lista al client
+  res.json(listautenti);
+})
+
+//UPDATE
+router.put('/id/:id', function(req,res){
+var id=req.params.id;
+var aggiornato=req.body
+console.log(id, aggiornato);
+var vecchio=listautenti.find(functon(el){
+  return el.id==id;
+});
+var indice=listautenti.indexOf(vecchio);
+listautenti.splice(indice,1,aggiornato);
+jsonfile.writeFile(path.join(__dirname,'database.json'),listautenti.function(err){
+  console.log(err);
+});
+res.json(aggiornato);
+});
 module.exports = router;
